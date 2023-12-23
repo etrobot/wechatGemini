@@ -55,7 +55,8 @@ class weChat():
             thread_pool.submit(self.send,'自动回复中，如需要和G聊天，请以感叹号加空格开头，如『! 请自我介绍』',msg['FromUserName'])
 
     def handle_group(self, msg):
-        if msg['MsgType']==49:
+        group_name = msg['User'].get('NickName', None)
+        if msg['MsgType']==49 and group_name in os.environ['GROUP'].replace('，',',').split(','):
             thread_pool.submit(self._do_send, ripPost(msg['Url'])+'\nTLDR;用中文总结要点', msg['FromUserName'])
             return
         elif not msg['IsAt']:
