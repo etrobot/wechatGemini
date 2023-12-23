@@ -1,6 +1,8 @@
 # encoding:utf-8
 import re
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
 import itchat
 import requests
 from bs4 import BeautifulSoup
@@ -36,6 +38,17 @@ def handler_group_msg(msg):
     weChat().handle_group(msg)
     return None
 
+@itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO])
+def download_files(msg):
+    msg.download('image.png')
+    cookie_picture = {
+        'mime_type': 'image/png',
+        'data': Path('image.png').read_bytes()
+    }
+    imgModel = genai.GenerativeModel('gemini-pro-vision')
+    response = imgModel.generate_content(contents=['请详细描述这张图片', cookie_picture])
+    return response.text
+
 class weChat():
     def __init__(self):
         pass
@@ -49,7 +62,7 @@ class weChat():
         if msg['MsgType']==49:
             thread_pool.submit(self._do_send, ripPost(msg['Url'])+'\nTLDR;用中文总结要点', msg['FromUserName'])
             return
-        if msg['Text'].startswith('！') or msg['Text'].startswith('! '):
+        if msg['MsgType']==1 and msg['Text'].startswith('！') or msg['Text'].startswith('! '):
             thread_pool.submit(self._do_send, msg['Text'],msg['FromUserName'])
         else:
             thread_pool.submit(self.send,'自动回复中，如需要和G聊天，请以感叹号加空格开头，如『! 请自我介绍』',msg['FromUserName'])
