@@ -1,0 +1,6 @@
+itchat-uos==1.5.0.dev0
+google.generativeai
+beautifulsoup4
+python-dotenv
+requests
+demjson3
