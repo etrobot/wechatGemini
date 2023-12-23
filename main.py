@@ -9,6 +9,9 @@ import logging
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
+genai.configure(api_key=os.environ['API_KEY'], transport="rest")
+model = genai.GenerativeModel('gemini-pro')
 
 def ripPost(url:str):
     response=requests.get(url)
@@ -21,7 +24,6 @@ def ripPost(url:str):
     if len('\n'.join(txt)) == 0:
         txt = re.sub(r'\\x[0-9a-fA-F]{2}', '',
                            soup.find('meta', {'name': 'description'}).attrs['content'])
-    print(txt)
     return txt
 
 @itchat.msg_register([TEXT, SHARING])
@@ -49,6 +51,8 @@ class weChat():
             return
         if msg['Text'].startswith('！') or msg['Text'].startswith('! '):
             thread_pool.submit(self._do_send, msg['Text'],msg['FromUserName'])
+        else:
+            thread_pool.submit(self.send,'自动回复中，如需要和G聊天，请以感叹号加空格开头，如『! 请自我介绍』',msg['FromUserName'])
 
     def handle_group(self, msg):
         if msg['MsgType']==49:
@@ -85,9 +89,6 @@ class weChat():
         return model.generate_content(queryText).text
 
 if __name__=='__main__':
-    load_dotenv(find_dotenv())
-    genai.configure(api_key=os.environ['API_KEY'], transport="rest")
-    model = genai.GenerativeModel('gemini-pro')
     thread_pool = ThreadPoolExecutor(max_workers=8)
     log = logging.getLogger('itchat')
     log.setLevel(logging.DEBUG)
