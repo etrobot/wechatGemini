@@ -70,14 +70,15 @@ class weChat():
 
     def handle_group(self, msg):
         group_name = msg['User'].get('NickName', None)
-        if msg['MsgType']==49 and group_name in os.environ['GROUP'].replace('，',',').split(','):
-            thread_pool.submit(self._do_send, ripPost(msg['Url'])+'\nTLDR;用中文总结要点', msg['FromUserName'])
-            return
-        elif not msg['IsAt']:
-            return
-        query = msg['Content'][len(msg['ActualNickName']) + 1:]
-        if query is not None:
-            thread_pool.submit(self._do_send_group, query, msg)
+        if group_name in os.environ['GROUP']:
+            if msg['MsgType']==49:
+                thread_pool.submit(self._do_send, ripPost(msg['Url'])+'\nTLDR;用中文总结要点', msg['FromUserName'])
+                return
+            elif not msg['IsAt']:
+                return
+            query = msg['Content'][len(itchat.search_friends()['NickName'])+1:]
+            if query is not None:
+                thread_pool.submit(self._do_send_group, query, msg)
 
     def send(self, msg, receiver):
         itchat.send(msg, toUserName=receiver)
@@ -95,6 +96,7 @@ class weChat():
     def _do_send_group(self, query, msg):
         if not query:
             return
+        print(query)
         group_id = msg['User']['UserName']
         reply_text = self.reply(query)
         if reply_text is not None:
