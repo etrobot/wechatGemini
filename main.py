@@ -64,7 +64,7 @@ class weChat():
             return
         if msg['MsgType']==1 and msg['Text'].startswith('！') or msg['Text'].startswith('! '):
             thread_pool.submit(self._do_send, msg['Text'],msg['FromUserName'])
-        else:
+        elif len(msg['Text'])>42:
             thread_pool.submit(self.send,'自动回复中，如需要和G聊天，请以感叹号加空格开头，如『! 请自我介绍』',msg['FromUserName'])
 
     def handle_group(self, msg):
