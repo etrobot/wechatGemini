@@ -40,14 +40,15 @@ def handler_group_msg(msg):
 
 @itchat.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO])
 def download_files(msg):
-    msg.download('image.png')
-    cookie_picture = {
-        'mime_type': 'image/png',
-        'data': Path('image.png').read_bytes()
-    }
-    imgModel = genai.GenerativeModel('gemini-pro-vision')
-    response = imgModel.generate_content(contents=['请详细描述这张图片', cookie_picture])
-    return response.text
+    if msg['MsgType']==3:
+        msg.download('image.png')
+        cookie_picture = {
+            'mime_type': 'image/png',
+            'data': Path('image.png').read_bytes()
+        }
+        imgModel = genai.GenerativeModel('gemini-pro-vision')
+        response = imgModel.generate_content(contents=['请详细描述这张图片', cookie_picture])
+        return response.text
 
 class weChat():
     def __init__(self):
